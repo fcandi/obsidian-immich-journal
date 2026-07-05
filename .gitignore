@@ -143,3 +143,11 @@ vite.config.ts.timestamp-*
 .vite/
 # main.js is a build artifact until releases exist
 main.js
+*.js.map
+
+# Obsidian runtime settings (contains server URL + API key when the repo is
+# symlinked into a vault as the plugin folder — must never be committed)
+data.json
+
+# OS
+.DS_Store

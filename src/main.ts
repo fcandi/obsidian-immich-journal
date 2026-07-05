@@ -1,0 +1,117 @@
+/**
+ * Plugin entry point: wires settings, i18n, the Immich client, the ribbon
+ * icon, the command, and the photo picker modal together.
+ *
+ * The command uses a plain `callback` (not `editorCallback`) on purpose so it
+ * also works from the mobile toolbar and without an open editor — the insert
+ * pipeline falls back to appending at the end of the file in that case.
+ */
+
+import { MarkdownView, Notice, Plugin, moment } from "obsidian";
+import { ImmichClient } from "./api/immichClient";
+import { t, initI18n, resolveLocale } from "./i18n";
+import { insertAssets } from "./insert/pipeline";
+import { DEFAULT_SETTINGS } from "./settings/defaults";
+import { ImmichJournalSettingTab, SettingsHost } from "./settings/SettingsTab";
+import type { ImmichAsset, PluginSettings } from "./types";
+import { PhotoPickerModal } from "./ui/PhotoPickerModal";
+import { resolveNoteDate } from "./util/resolveDate";
+
+export default class ImmichJournalPlugin
+	extends Plugin
+	implements SettingsHost
+{
+	settings!: PluginSettings;
+	client!: ImmichClient;
+
+	async onload(): Promise<void> {
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			await this.loadData()
+		);
+		initI18n(resolveLocale(this.settings.languageOverride));
+
+		// The config getter reads live settings, so URL/key changes in the
+		// settings tab apply to the very next request without a reload.
+		this.client = new ImmichClient(() => ({
+			serverUrl: this.settings.serverUrl,
+			apiKey: this.settings.apiKey,
+		}));
+
+		this.addSettingTab(new ImmichJournalSettingTab(this.app, this));
+
+		this.addRibbonIcon("image", t("ribbon.tooltip"), () => {
+			this.openPhotoPicker();
+		});
+
+		this.addCommand({
+			id: "insert-photos-of-this-day",
+			name: t("command.insertPhotos"),
+			callback: () => {
+				this.openPhotoPicker();
+			},
+		});
+	}
+
+	async saveSettings(): Promise<void> {
+		await this.saveData(this.settings);
+	}
+
+	/**
+	 * Opens the photo picker for the active note. Without an active file there
+	 * is nothing to insert into, so a Notice is shown instead. When the note's
+	 * date cannot be resolved the modal still opens (with a date input
+	 * fallback), preceded by an informational Notice.
+	 */
+	private openPhotoPicker(): void {
+		const file = this.app.workspace.getActiveFile();
+		if (!file) {
+			new Notice(t("notice.noActiveFile"));
+			return;
+		}
+
+		const { date } = resolveNoteDate(
+			{
+				basename: file.basename,
+				frontmatter:
+					this.app.metadataCache.getFileCache(file)?.frontmatter,
+				titleFormat: this.settings.titleDateFormat,
+				frontmatterField: this.settings.frontmatterField,
+			},
+			moment
+		);
+		if (!date) {
+			new Notice(t("notice.noDate"));
+		}
+
+		new PhotoPickerModal(this.app, {
+			client: this.client,
+			settings: this.settings,
+			initialDate: date,
+			onInsert: async (assets: ImmichAsset[]) => {
+				// Insert at the cursor only when the active editor is showing
+				// exactly the file the modal was opened for; otherwise append
+				// to the end of that file.
+				const view =
+					this.app.workspace.getActiveViewOfType(MarkdownView);
+				const editor =
+					view && view.file === file ? view.editor : null;
+				await insertAssets(
+					{
+						app: this.app,
+						client: this.client,
+						settings: this.settings,
+					},
+					assets,
+					{ editor, file }
+				);
+			},
+		}).open();
+	}
+
+	onunload(): void {
+		// Nothing to clean up here: observers and object URLs are owned and
+		// released by the modal, and Obsidian unregisters UI elements itself.
+	}
+}
