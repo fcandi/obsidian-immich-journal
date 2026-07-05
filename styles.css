@@ -37,6 +37,13 @@
 	flex: 0 0 auto;
 }
 
+/* Desktop only: keep the date input clear of Obsidian's absolutely
+   positioned modal close button in the top-right corner. On mobile the
+   safe-area offset already separates the two. */
+body:not(.is-mobile) .immich-journal-header {
+	padding-right: 2rem;
+}
+
 .immich-journal-date {
 	flex: 1 1 auto;
 	font-weight: 600;
