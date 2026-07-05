@@ -263,6 +263,22 @@
 .immich-journal-count {
 	color: var(--text-muted);
 	font-size: var(--font-ui-small);
+	/* Keep the count centered between the cancel and insert buttons and let
+	   it absorb the free space so the buttons stay pinned to the edges. */
+	flex: 1 1 auto;
+	text-align: center;
+}
+
+.immich-journal-cancel-btn {
+	background: transparent;
+	box-shadow: none;
+	border: 1px solid var(--background-modifier-border);
+	color: var(--text-muted);
+}
+
+.immich-journal-cancel-btn:hover {
+	background: var(--background-modifier-hover);
+	color: var(--text-normal);
 }
 
 .immich-journal-insert-btn {
@@ -290,6 +306,15 @@ body.is-mobile .immich-journal-modal {
 	height: 100%;
 	max-height: 100vh;
 	border-radius: 0;
+	/* Full-height sheet: keep the header (and the built-in close button)
+	   out of the iOS status-bar / notch zone. */
+	padding-top: env(safe-area-inset-top, 0px);
+}
+
+body.is-mobile .immich-journal-modal .modal-close-button {
+	/* The X is positioned absolutely against the modal, so the padding above
+	   does not move it — shift it below the status bar explicitly. */
+	top: calc(var(--size-4-2, 0.5rem) + env(safe-area-inset-top, 0px));
 }
 
 body.is-mobile .immich-journal-modal .modal-content {
@@ -324,7 +349,8 @@ body.is-mobile .immich-journal-footer {
 	padding: 0.85rem 1rem calc(0.85rem + env(safe-area-inset-bottom, 0px));
 }
 
-body.is-mobile .immich-journal-insert-btn {
+body.is-mobile .immich-journal-insert-btn,
+body.is-mobile .immich-journal-cancel-btn {
 	min-height: 44px;
 	padding: 0.5rem 1.25rem;
 }

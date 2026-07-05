@@ -483,6 +483,14 @@ export class PhotoPickerModal extends Modal {
 		this.footerEl = this.contentEl.createDiv({
 			cls: "immich-journal-footer",
 		});
+		// Explicit cancel button: on mobile the modal is a full-height sheet
+		// whose top-right X can sit in the unreachable status-bar zone, so the
+		// footer provides an always-tappable way out.
+		const cancelBtn = this.footerEl.createEl("button", {
+			cls: "immich-journal-cancel-btn",
+			text: t("modal.cancelButton"),
+		});
+		cancelBtn.addEventListener("click", () => this.close());
 		this.countEl = this.footerEl.createDiv({
 			cls: "immich-journal-count",
 		});

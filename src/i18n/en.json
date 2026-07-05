@@ -63,6 +63,7 @@
 	"modal.nextDay": "Next day",
 	"modal.datePlaceholder": "Enter date (YYYY-MM-DD)",
 	"modal.selectedCount": "{{count}} selected",
+	"modal.cancelButton": "Cancel",
 	"modal.insertButton": "Insert",
 
 	"notice.inserted": "{{count}} photo(s) inserted.",
