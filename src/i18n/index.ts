@@ -2,9 +2,13 @@ import { moment } from "obsidian";
 import { renderTemplate } from "../util/template";
 import * as de from "./de.json";
 import * as en from "./en.json";
+import * as es from "./es.json";
+import * as fr from "./fr.json";
+import * as ja from "./ja.json";
+import * as zh from "./zh.json";
 
 /** Supported plugin locales. */
-export type Locale = "en" | "de";
+export type Locale = "en" | "de" | "es" | "fr" | "ja" | "zh";
 
 /** Locale setting value, including the "auto" option that detects Obsidian's UI language. */
 export type LocaleSetting = "auto" | Locale;
@@ -15,20 +19,32 @@ export type Dictionary = Record<string, string>;
 /** Translation tables keyed by locale. */
 export type Dictionaries = Record<Locale, Dictionary>;
 
-const dictionaries: Dictionaries = { en, de };
+const dictionaries: Dictionaries = { en, de, es, fr, ja, zh };
+
+/** All locales the plugin ships translations for. */
+export const SUPPORTED_LOCALES: readonly Locale[] = [
+	"en",
+	"de",
+	"es",
+	"fr",
+	"ja",
+	"zh",
+];
 
 let currentLocale: Locale = "en";
 
 /**
  * Resolves a locale setting to a concrete locale.
  *
- * An explicit `"en"` or `"de"` override always wins. For `"auto"`, this tries to read
- * Obsidian's UI language defensively (localStorage, then moment's global locale), mapping
- * anything starting with "de" to German and everything else to English. All environment
- * access is wrapped in try/catch so this never throws, e.g. in the node test environment.
+ * An explicit locale override always wins. For `"auto"`, this tries to read
+ * Obsidian's UI language defensively (localStorage, then moment's global locale),
+ * matching the detected language code against the supported locales by prefix
+ * (so e.g. "zh-cn"/"zh-tw" map to "zh") and falling back to English. All
+ * environment access is wrapped in try/catch so this never throws, e.g. in the
+ * node test environment.
  */
 export function resolveLocale(override: LocaleSetting): Locale {
-	if (override === "en" || override === "de") {
+	if (override !== "auto") {
 		return override;
 	}
 
@@ -49,7 +65,10 @@ export function resolveLocale(override: LocaleSetting): Locale {
 		}
 	}
 
-	return detected.toLowerCase().startsWith("de") ? "de" : "en";
+	const normalized = detected.toLowerCase();
+	return (
+		SUPPORTED_LOCALES.find((locale) => normalized.startsWith(locale)) ?? "en"
+	);
 }
 
 /** Initializes the i18n module with a resolved locale. */

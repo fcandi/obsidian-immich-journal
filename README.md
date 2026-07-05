@@ -28,7 +28,7 @@ linked back to Immich.
 - Each inserted photo links back to the original asset in your Immich web UI
 - Works on **desktop and mobile** — including setups where Immich is only reachable
   through a VPN such as Tailscale
-- English and German UI, prepared for further translations
+- Localized UI: English, German, Spanish, French, Japanese, Chinese
 
 ## Requirements
 

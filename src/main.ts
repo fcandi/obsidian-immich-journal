@@ -25,11 +25,22 @@ export default class ImmichJournalPlugin
 	client!: ImmichClient;
 
 	async onload(): Promise<void> {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			await this.loadData()
-		);
+		const loaded = ((await this.loadData()) ?? {}) as Partial<PluginSettings> & {
+			gridColsDesktop?: number;
+		};
+		// Migration: the column setting was named `gridColsDesktop` until 0.1.1
+		// even though it applies on mobile too. Carry a stored value over only
+		// when it differs from that era's default (4) — an untouched old
+		// default should pick up the new default (3) instead.
+		if (
+			loaded.gridCols === undefined &&
+			loaded.gridColsDesktop !== undefined &&
+			loaded.gridColsDesktop !== 4
+		) {
+			loaded.gridCols = loaded.gridColsDesktop;
+		}
+		delete loaded.gridColsDesktop;
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
 		initI18n(resolveLocale(this.settings.languageOverride));
 
 		// The config getter reads live settings, so URL/key changes in the
@@ -89,6 +100,20 @@ export default class ImmichJournalPlugin
 			client: this.client,
 			settings: this.settings,
 			initialDate: date,
+			openSettings: () => {
+				// `app.setting` is not part of the public typings but is the
+				// established way to deep-link into a plugin's settings tab.
+				const setting = (
+					this.app as unknown as {
+						setting: {
+							open(): void;
+							openTabById(id: string): void;
+						};
+					}
+				).setting;
+				setting.open();
+				setting.openTabById(this.manifest.id);
+			},
 			onInsert: async (assets: ImmichAsset[]) => {
 				// Insert at the cursor only when the active editor is showing
 				// exactly the file the modal was opened for; otherwise append

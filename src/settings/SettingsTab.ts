@@ -262,11 +262,11 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName(t("settings.display")).setHeading();
 
 		new Setting(containerEl)
-			.setName(t("settings.gridColsDesktop.name"))
-			.setDesc(t("settings.gridColsDesktop.desc"))
+			.setName(t("settings.gridCols.name"))
+			.setDesc(t("settings.gridCols.desc"))
 			.addText((text) =>
 				text
-					.setValue(String(this.plugin.settings.gridColsDesktop))
+					.setValue(String(this.plugin.settings.gridCols))
 					.onChange(async (value) => {
 						const parsed = Number(value);
 						if (!Number.isFinite(parsed)) {
@@ -274,7 +274,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 						}
 						const clamped = Math.min(8, Math.max(2, Math.round(parsed)));
 						await this.updateSettings((settings) => {
-							settings.gridColsDesktop = clamped;
+							settings.gridCols = clamped;
 						});
 					})
 			);
@@ -287,6 +287,10 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 					.addOption("auto", t("settings.language.optionAuto"))
 					.addOption("en", t("settings.language.optionEn"))
 					.addOption("de", t("settings.language.optionDe"))
+					.addOption("es", t("settings.language.optionEs"))
+					.addOption("fr", t("settings.language.optionFr"))
+					.addOption("ja", t("settings.language.optionJa"))
+					.addOption("zh", t("settings.language.optionZh"))
 					.setValue(this.plugin.settings.languageOverride)
 					.onChange(async (value) => {
 						const languageOverride = value as PluginSettings["languageOverride"];

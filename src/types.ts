@@ -76,8 +76,8 @@ export interface PluginSettings {
 	linkToImmich: boolean;
 	titleDateFormat: string;
 	frontmatterField: string;
-	gridColsDesktop: number;
-	languageOverride: "auto" | "en" | "de";
+	gridCols: number;
+	languageOverride: "auto" | "en" | "de" | "es" | "fr" | "ja" | "zh";
 }
 
 /**

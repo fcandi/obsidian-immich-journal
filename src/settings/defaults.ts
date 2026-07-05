@@ -18,6 +18,6 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	linkToImmich: true,
 	titleDateFormat: "YYYY-MM-DD",
 	frontmatterField: "",
-	gridColsDesktop: 4,
+	gridCols: 3,
 	languageOverride: "auto",
 };

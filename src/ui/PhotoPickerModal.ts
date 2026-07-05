@@ -22,10 +22,12 @@ export interface PhotoPickerModalDeps {
 	initialDate: string | null;
 	/** Called with the selected assets when the user confirms the insert. */
 	onInsert: (assets: ImmichAsset[]) => Promise<void>;
+	/** Opens the plugin's settings tab (used by the not-configured state). */
+	openSettings: () => void;
 }
 
 /** UI states of the modal body. */
-type ModalState = "loading" | "empty" | "error" | "loaded";
+type ModalState = "loading" | "empty" | "error" | "loaded" | "unconfigured";
 
 /** Matches a complete "YYYY-MM-DD" day string. */
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
@@ -105,6 +107,12 @@ export class PhotoPickerModal extends Modal {
 
 	onOpen(): void {
 		this.modalEl.addClass("immich-journal-modal");
+		// Also expose the configured column count on the modal itself so the
+		// loading skeleton grid matches the real grid before assets arrive.
+		this.modalEl.style.setProperty(
+			"--immich-journal-cols",
+			String(this.deps.settings.gridCols)
+		);
 		this.contentEl.empty();
 
 		this.renderHeader();
@@ -113,9 +121,24 @@ export class PhotoPickerModal extends Modal {
 		});
 		this.renderFooter();
 
+		// Without a server URL and API key nothing can load: guide the user
+		// to the settings tab instead of running into a network error.
+		if (!this.isConfigured()) {
+			this.renderState("unconfigured");
+			return;
+		}
+
 		if (this.currentDate) {
 			void this.loadDay(this.currentDate);
 		}
+	}
+
+	/** True when both connection settings required for any request are set. */
+	private isConfigured(): boolean {
+		return (
+			this.deps.settings.serverUrl.trim() !== "" &&
+			this.deps.settings.apiKey.trim() !== ""
+		);
 	}
 
 	onClose(): void {
@@ -215,6 +238,10 @@ export class PhotoPickerModal extends Modal {
 	// ----------------------------------------------------------------- loading
 
 	private async loadDay(day: string): Promise<void> {
+		if (!this.isConfigured()) {
+			this.renderState("unconfigured");
+			return;
+		}
 		const token = ++this.requestToken;
 		this.renderState("loading");
 
@@ -293,6 +320,21 @@ export class PhotoPickerModal extends Modal {
 				});
 				break;
 			}
+			case "unconfigured": {
+				const state = this.bodyEl.createDiv({
+					cls: "immich-journal-state-unconfigured",
+				});
+				state.createDiv({ text: t("modal.notConfigured") });
+				const configBtn = state.createEl("button", {
+					cls: "immich-journal-config-btn",
+					text: t("modal.openSettings"),
+				});
+				configBtn.addEventListener("click", () => {
+					this.close();
+					this.deps.openSettings();
+				});
+				break;
+			}
 			case "loaded": {
 				const grid = this.bodyEl.createDiv({
 					cls: "immich-journal-grid",
@@ -311,11 +353,11 @@ export class PhotoPickerModal extends Modal {
 	 * overlay (hover on desktop, long-press on touch devices).
 	 */
 	protected renderGrid(container: HTMLElement, assets: ImmichAsset[]): void {
-		// Column count is a CSS custom property; the stylesheet overrides it
-		// to a fixed mobile value on narrow viewports.
+		// Column count is a CSS custom property, applied on desktop and
+		// mobile alike (the stylesheet only provides the fallback).
 		container.style.setProperty(
 			"--immich-journal-cols",
-			String(this.deps.settings.gridColsDesktop)
+			String(this.deps.settings.gridCols)
 		);
 
 		// A fresh grid replaces any previous one (e.g. after day navigation),
@@ -483,14 +525,6 @@ export class PhotoPickerModal extends Modal {
 		this.footerEl = this.contentEl.createDiv({
 			cls: "immich-journal-footer",
 		});
-		// Explicit cancel button: on mobile the modal is a full-height sheet
-		// whose top-right X can sit in the unreachable status-bar zone, so the
-		// footer provides an always-tappable way out.
-		const cancelBtn = this.footerEl.createEl("button", {
-			cls: "immich-journal-cancel-btn",
-			text: t("modal.cancelButton"),
-		});
-		cancelBtn.addEventListener("click", () => this.close());
 		this.countEl = this.footerEl.createDiv({
 			cls: "immich-journal-count",
 		});
