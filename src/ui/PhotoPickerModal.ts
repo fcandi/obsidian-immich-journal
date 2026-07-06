@@ -103,6 +103,13 @@ export class PhotoPickerModal extends Modal {
 		super(app);
 		this.deps = deps;
 		this.currentDate = deps.initialDate;
+		// Base Modal closes on Escape via its scope; register explicitly as
+		// well so the shortcut keeps working even when another handler (e.g.
+		// a focused input) interferes with the default registration.
+		this.scope.register([], "Escape", () => {
+			this.close();
+			return false;
+		});
 	}
 
 	onOpen(): void {
@@ -469,30 +476,28 @@ export class PhotoPickerModal extends Modal {
 		});
 
 		// --- long-press overlay (mobile; desktop hover is pure CSS) --------
-		// The overlay is revealed with inline styles so the stylesheet only
-		// needs to handle the :hover case.
-		let longPressTimer: ReturnType<typeof setTimeout> | null = null;
-		const hideOverlay = () => {
-			overlay.style.removeProperty("opacity");
-			overlay.style.removeProperty("visibility");
-		};
+		// The overlay is revealed via a CSS class so the stylesheet stays in
+		// charge of the actual presentation.
+		let longPressTimer: number | null = null;
+		let overlayShown = false;
 		const cancelLongPress = (suppressClick: boolean) => {
 			if (longPressTimer !== null) {
-				clearTimeout(longPressTimer);
+				window.clearTimeout(longPressTimer);
 				longPressTimer = null;
 			}
-			if (overlay.style.opacity !== "") {
-				hideOverlay();
+			if (overlayShown) {
+				overlay.removeClass("immich-journal-overlay-visible");
+				overlayShown = false;
 				suppressNextClick = suppressClick;
 			}
 		};
 		cell.addEventListener(
 			"touchstart",
 			() => {
-				longPressTimer = setTimeout(() => {
+				longPressTimer = window.setTimeout(() => {
 					longPressTimer = null;
-					overlay.style.opacity = "1";
-					overlay.style.visibility = "visible";
+					overlay.addClass("immich-journal-overlay-visible");
+					overlayShown = true;
 				}, LONG_PRESS_MS);
 			},
 			{ passive: true }

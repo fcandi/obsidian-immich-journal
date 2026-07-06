@@ -16,7 +16,7 @@ import { t, setLocale, resolveLocale } from "../i18n";
 
 /** Minimal surface of the plugin instance the settings tab depends on. */
 export interface SettingsHost {
-	settings: PluginSettings;
+	pluginSettings: PluginSettings;
 	saveSettings(): Promise<void>;
 	client: ImmichClient;
 }
@@ -40,7 +40,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 	}
 
 	private async updateSettings(mutate: (settings: PluginSettings) => void): Promise<void> {
-		mutate(this.plugin.settings);
+		mutate(this.plugin.pluginSettings);
 		await this.plugin.saveSettings();
 	}
 
@@ -52,7 +52,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.serverUrl.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.serverUrl)
+					.setValue(this.plugin.pluginSettings.serverUrl)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.serverUrl = value;
@@ -65,7 +65,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.apiKey.desc"))
 			.addText((text) => {
 				text.inputEl.type = "password";
-				text.setValue(this.plugin.settings.apiKey).onChange(async (value) => {
+				text.setValue(this.plugin.pluginSettings.apiKey).onChange(async (value) => {
 					await this.updateSettings((settings) => {
 						settings.apiKey = value;
 					});
@@ -119,7 +119,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.maxEdgePx.desc"))
 			.addText((text) =>
 				text
-					.setValue(String(this.plugin.settings.maxEdgePx))
+					.setValue(String(this.plugin.pluginSettings.maxEdgePx))
 					.onChange(async (value) => {
 						const parsed = Number(value);
 						if (!Number.isFinite(parsed)) {
@@ -138,8 +138,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.addSlider((slider) =>
 				slider
 					.setLimits(0.5, 1.0, 0.05)
-					.setValue(this.plugin.settings.jpegQuality)
-					.setDynamicTooltip()
+					.setValue(this.plugin.pluginSettings.jpegQuality)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.jpegQuality = value;
@@ -152,7 +151,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.attachmentFolder.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.attachmentFolder)
+					.setValue(this.plugin.pluginSettings.attachmentFolder)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.attachmentFolder = value;
@@ -165,7 +164,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.fileNameTemplate.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.fileNameTemplate)
+					.setValue(this.plugin.pluginSettings.fileNameTemplate)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.fileNameTemplate = value;
@@ -178,7 +177,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.markdownTemplate.desc"))
 			.addTextArea((textArea) =>
 				textArea
-					.setValue(this.plugin.settings.markdownTemplate)
+					.setValue(this.plugin.pluginSettings.markdownTemplate)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.markdownTemplate = value;
@@ -191,7 +190,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.captionTemplate.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.captionTemplate)
+					.setValue(this.plugin.pluginSettings.captionTemplate)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.captionTemplate = value;
@@ -206,7 +205,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 				dropdown
 					.addOption("markdown", t("settings.embedStyle.optionMarkdown"))
 					.addOption("wikilink", t("settings.embedStyle.optionWikilink"))
-					.setValue(this.plugin.settings.embedStyle)
+					.setValue(this.plugin.pluginSettings.embedStyle)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.embedStyle = value as PluginSettings["embedStyle"];
@@ -219,7 +218,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.linkToImmich.desc"))
 			.addToggle((toggle) =>
 				toggle
-					.setValue(this.plugin.settings.linkToImmich)
+					.setValue(this.plugin.pluginSettings.linkToImmich)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.linkToImmich = value;
@@ -236,7 +235,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.titleDateFormat.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.titleDateFormat)
+					.setValue(this.plugin.pluginSettings.titleDateFormat)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.titleDateFormat = value;
@@ -249,7 +248,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.frontmatterField.desc"))
 			.addText((text) =>
 				text
-					.setValue(this.plugin.settings.frontmatterField)
+					.setValue(this.plugin.pluginSettings.frontmatterField)
 					.onChange(async (value) => {
 						await this.updateSettings((settings) => {
 							settings.frontmatterField = value;
@@ -266,7 +265,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			.setDesc(t("settings.gridCols.desc"))
 			.addText((text) =>
 				text
-					.setValue(String(this.plugin.settings.gridCols))
+					.setValue(String(this.plugin.pluginSettings.gridCols))
 					.onChange(async (value) => {
 						const parsed = Number(value);
 						if (!Number.isFinite(parsed)) {
@@ -291,7 +290,7 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 					.addOption("fr", t("settings.language.optionFr"))
 					.addOption("ja", t("settings.language.optionJa"))
 					.addOption("zh", t("settings.language.optionZh"))
-					.setValue(this.plugin.settings.languageOverride)
+					.setValue(this.plugin.pluginSettings.languageOverride)
 					.onChange(async (value) => {
 						const languageOverride = value as PluginSettings["languageOverride"];
 						await this.updateSettings((settings) => {

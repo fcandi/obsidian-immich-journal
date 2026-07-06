@@ -111,7 +111,7 @@ export async function downscaleToJpeg(
 			return buf;
 		}
 
-		const canvas = document.createElement("canvas");
+		const canvas = createEl("canvas");
 		canvas.width = target.width;
 		canvas.height = target.height;
 		const ctx = canvas.getContext("2d");

@@ -332,9 +332,9 @@ export class ImmichClient {
 	private withTimeout(
 		promise: Promise<RequestUrlResponse>
 	): Promise<RequestUrlResponse> {
-		let timer: ReturnType<typeof setTimeout>;
+		let timer: number;
 		const timeout = new Promise<never>((_, reject) => {
-			timer = setTimeout(() => {
+			timer = window.setTimeout(() => {
 				reject(
 					new ImmichError(
 						"network",
@@ -347,7 +347,7 @@ export class ImmichClient {
 		// unhandled-rejection noise after a timeout won the race.
 		promise.catch(() => {});
 		return Promise.race([promise, timeout]).finally(() =>
-			clearTimeout(timer)
+			window.clearTimeout(timer)
 		);
 	}
 

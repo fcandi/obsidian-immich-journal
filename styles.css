@@ -254,6 +254,14 @@ body.is-mobile .immich-journal-config-btn {
 	border-color: var(--interactive-accent);
 }
 
+/* Applied on mobile long-press; the overlay is permanently visible in the
+   current design, so this class is a forward-compatible hook for themes or a
+   future hidden-by-default variant. */
+.immich-journal-overlay-visible {
+	opacity: 1;
+	visibility: visible;
+}
+
 /* Bottom gradient overlay showing time / description on the cell. */
 .immich-journal-overlay {
 	position: absolute;

@@ -1,4 +1,4 @@
-import { moment } from "obsidian";
+import { getLanguage, moment } from "obsidian";
 import { renderTemplate } from "../util/template";
 import * as de from "./de.json";
 import * as en from "./en.json";
@@ -37,7 +37,7 @@ let currentLocale: Locale = "en";
  * Resolves a locale setting to a concrete locale.
  *
  * An explicit locale override always wins. For `"auto"`, this tries to read
- * Obsidian's UI language defensively (localStorage, then moment's global locale),
+ * Obsidian's UI language defensively (getLanguage, then moment's global locale),
  * matching the detected language code against the supported locales by prefix
  * (so e.g. "zh-cn"/"zh-tw" map to "zh") and falling back to English. All
  * environment access is wrapped in try/catch so this never throws, e.g. in the
@@ -51,12 +51,7 @@ export function resolveLocale(override: LocaleSetting): Locale {
 	let detected = "en";
 
 	try {
-		const stored = window?.localStorage?.getItem("language");
-		if (stored) {
-			detected = stored;
-		} else {
-			detected = moment.locale();
-		}
+		detected = getLanguage();
 	} catch {
 		try {
 			detected = moment.locale();

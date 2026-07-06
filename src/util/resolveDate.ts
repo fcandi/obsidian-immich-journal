@@ -78,8 +78,11 @@ export function parseFrontmatterDate(
 		value = rawValue.toISOString();
 	} else if (typeof rawValue === "string") {
 		value = rawValue;
-	} else {
+	} else if (typeof rawValue === "number") {
 		value = String(rawValue);
+	} else {
+		// Objects/arrays would stringify to "[object Object]" — not a date.
+		return null;
 	}
 
 	if (!value.trim()) {

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { RequestUrlResponse } from "obsidian";
-import type { ImmichAsset } from "../types";
+import type { ImmichAsset, SearchMetadataBody } from "../types";
 import { ImmichClient, ImmichError, RequestFn } from "./immichClient";
 
 /** Exposes the protected request core for testing. */
@@ -172,7 +172,7 @@ describe("ImmichClient request core", () => {
 		});
 		// The loser of the race rejects afterwards; this must not surface anywhere.
 		rejectLate(new Error("late failure"));
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await new Promise((resolve) => window.setTimeout(resolve, 0));
 	});
 });
 
@@ -213,7 +213,7 @@ describe("ImmichClient.searchDayAssets", () => {
 		expect(params.url).toBe("https://immich.example/api/search/metadata");
 		expect(params.method).toBe("POST");
 		expect(params.contentType).toBe("application/json");
-		const body = JSON.parse(params.body as string);
+		const body = JSON.parse(params.body as string) as SearchMetadataBody;
 		expect(body).toMatchObject({
 			type: "IMAGE",
 			withExif: true,
@@ -244,7 +244,7 @@ describe("ImmichClient.searchDayAssets", () => {
 		expect(result.map((a) => a.id)).toEqual(["p1", "p2", "p3"]);
 		expect(requestFn).toHaveBeenCalledTimes(3);
 		const pages = requestFn.mock.calls.map(
-			(call) => JSON.parse(call[0].body as string).page
+			(call) => (JSON.parse(call[0].body as string) as SearchMetadataBody).page
 		);
 		expect(pages).toEqual([1, 2, 3]);
 	});
@@ -361,7 +361,7 @@ describe("ImmichClient.findLatestAssetDay", () => {
 
 		expect(result).toBe("2026-07-04");
 		expect(requestFn).toHaveBeenCalledTimes(1);
-		const body = JSON.parse(requestFn.mock.calls[0][0].body as string);
+		const body = JSON.parse(requestFn.mock.calls[0][0].body as string) as SearchMetadataBody;
 		expect(body).toMatchObject({
 			type: "IMAGE",
 			order: "desc",

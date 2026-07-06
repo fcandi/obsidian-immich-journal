@@ -21,7 +21,7 @@ export default class ImmichJournalPlugin
 	extends Plugin
 	implements SettingsHost
 {
-	settings!: PluginSettings;
+	pluginSettings!: PluginSettings;
 	client!: ImmichClient;
 
 	async onload(): Promise<void> {
@@ -40,14 +40,14 @@ export default class ImmichJournalPlugin
 			loaded.gridCols = loaded.gridColsDesktop;
 		}
 		delete loaded.gridColsDesktop;
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, loaded);
-		initI18n(resolveLocale(this.settings.languageOverride));
+		this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, loaded);
+		initI18n(resolveLocale(this.pluginSettings.languageOverride));
 
 		// The config getter reads live settings, so URL/key changes in the
 		// settings tab apply to the very next request without a reload.
 		this.client = new ImmichClient(() => ({
-			serverUrl: this.settings.serverUrl,
-			apiKey: this.settings.apiKey,
+			serverUrl: this.pluginSettings.serverUrl,
+			apiKey: this.pluginSettings.apiKey,
 		}));
 
 		this.addSettingTab(new ImmichJournalSettingTab(this.app, this));
@@ -66,7 +66,7 @@ export default class ImmichJournalPlugin
 	}
 
 	async saveSettings(): Promise<void> {
-		await this.saveData(this.settings);
+		await this.saveData(this.pluginSettings);
 	}
 
 	/**
@@ -87,8 +87,8 @@ export default class ImmichJournalPlugin
 				basename: file.basename,
 				frontmatter:
 					this.app.metadataCache.getFileCache(file)?.frontmatter,
-				titleFormat: this.settings.titleDateFormat,
-				frontmatterField: this.settings.frontmatterField,
+				titleFormat: this.pluginSettings.titleDateFormat,
+				frontmatterField: this.pluginSettings.frontmatterField,
 			},
 			moment
 		);
@@ -96,7 +96,7 @@ export default class ImmichJournalPlugin
 		// most recent day that has photos and lets the user navigate.
 		new PhotoPickerModal(this.app, {
 			client: this.client,
-			settings: this.settings,
+			settings: this.pluginSettings,
 			initialDate: date,
 			openSettings: () => {
 				// `app.setting` is not part of the public typings but is the
@@ -124,7 +124,7 @@ export default class ImmichJournalPlugin
 					{
 						app: this.app,
 						client: this.client,
-						settings: this.settings,
+						settings: this.pluginSettings,
 					},
 					assets,
 					{ editor, file }
