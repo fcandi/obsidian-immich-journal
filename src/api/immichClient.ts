@@ -149,6 +149,34 @@ export class ImmichClient {
 	}
 
 	/**
+	 * Finds the local calendar day of the most recently taken image, or
+	 * `null` for an empty library. Used as the starting day when a note's
+	 * date cannot be resolved: the picker then opens on the newest day that
+	 * actually has photos instead of an error.
+	 */
+	async findLatestAssetDay(): Promise<string | null> {
+		const body: SearchMetadataBody = {
+			type: "IMAGE",
+			withExif: false,
+			order: "desc",
+			size: 1,
+			page: 1,
+		};
+
+		const response = await this.request<SearchMetadataResponse>(
+			"/api/search/metadata",
+			{
+				method: "POST",
+				body: JSON.stringify(body),
+				contentType: "application/json",
+			}
+		);
+
+		const latest = response?.assets?.items?.[0];
+		return latest ? latest.localDateTime.slice(0, 10) : null;
+	}
+
+	/**
 	 * Fetches the raw bytes of an asset's thumbnail image.
 	 *
 	 * @param id Immich asset id.

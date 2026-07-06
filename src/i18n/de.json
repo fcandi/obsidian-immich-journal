@@ -73,6 +73,5 @@
 
 	"notice.inserted": "{{count}} Foto(s) eingefügt.",
 	"notice.insertFailed": "{{count}} Foto(s) konnten nicht eingefügt werden.",
-	"notice.noDate": "Das Datum für diese Notiz konnte nicht bestimmt werden. Bitte stelle den Dateinamen oder das Frontmatter-Feld ein.",
 	"notice.noActiveFile": "Öffne zuerst eine Notiz — es gibt nichts, in das Fotos eingefügt werden könnten."
 }

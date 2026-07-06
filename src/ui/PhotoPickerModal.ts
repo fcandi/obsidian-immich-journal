@@ -130,6 +130,41 @@ export class PhotoPickerModal extends Modal {
 
 		if (this.currentDate) {
 			void this.loadDay(this.currentDate);
+		} else {
+			// No date could be derived from the note: start on the most
+			// recent day that has photos (the user can navigate from there).
+			void this.loadLatestDay();
+		}
+	}
+
+	/**
+	 * Looks up the newest day with at least one photo and loads it. Falls
+	 * back to the empty state (with the prominent date input) when the
+	 * library is empty.
+	 */
+	private async loadLatestDay(): Promise<void> {
+		const token = ++this.requestToken;
+		this.renderState("loading");
+
+		let day: string | null;
+		try {
+			day = await this.deps.client.findLatestAssetDay();
+		} catch (error) {
+			if (token !== this.requestToken) {
+				return;
+			}
+			this.renderState("error", this.errorMessage(error));
+			return;
+		}
+
+		if (token !== this.requestToken) {
+			return; // The user picked a date while the lookup was running.
+		}
+
+		if (day) {
+			this.setDate(day);
+		} else {
+			this.renderState("empty");
 		}
 	}
 

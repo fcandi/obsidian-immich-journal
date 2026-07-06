@@ -73,6 +73,5 @@
 
 	"notice.inserted": "{{count}}枚の写真を挿入しました。",
 	"notice.insertFailed": "{{count}}枚の写真を挿入できませんでした。",
-	"notice.noDate": "このノートの日付を特定できませんでした。ファイル名またはフロントマターのフィールドを設定してください。",
 	"notice.noActiveFile": "まずノートを開いてください — 写真を挿入する場所がありません。"
 }

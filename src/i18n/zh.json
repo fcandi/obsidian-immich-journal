@@ -73,6 +73,5 @@
 
 	"notice.inserted": "已插入 {{count}} 张照片。",
 	"notice.insertFailed": "{{count}} 张照片插入失败。",
-	"notice.noDate": "无法确定此笔记的日期。请设置文件名或 frontmatter 字段。",
 	"notice.noActiveFile": "请先打开一个笔记 — 没有可以插入照片的位置。"
 }

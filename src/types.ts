@@ -51,8 +51,10 @@ export interface ImmichAsset {
  * location" semantics.
  */
 export interface SearchMetadataBody {
-	takenAfter: string;
-	takenBefore: string;
+	takenAfter?: string;
+	takenBefore?: string;
+	/** Sort order by taken timestamp; the server default is "desc". */
+	order?: "asc" | "desc";
 	type: "IMAGE";
 	withExif: boolean;
 	size: number;

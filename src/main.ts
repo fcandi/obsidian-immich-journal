@@ -72,8 +72,8 @@ export default class ImmichJournalPlugin
 	/**
 	 * Opens the photo picker for the active note. Without an active file there
 	 * is nothing to insert into, so a Notice is shown instead. When the note's
-	 * date cannot be resolved the modal still opens (with a date input
-	 * fallback), preceded by an informational Notice.
+	 * date cannot be resolved the modal opens on the most recent day that has
+	 * photos (with the date input as a direct-jump fallback).
 	 */
 	private openPhotoPicker(): void {
 		const file = this.app.workspace.getActiveFile();
@@ -92,10 +92,8 @@ export default class ImmichJournalPlugin
 			},
 			moment
 		);
-		if (!date) {
-			new Notice(t("notice.noDate"));
-		}
-
+		// No resolvable date is not an error: the modal then starts on the
+		// most recent day that has photos and lets the user navigate.
 		new PhotoPickerModal(this.app, {
 			client: this.client,
 			settings: this.settings,

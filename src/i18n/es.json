@@ -73,6 +73,5 @@
 
 	"notice.inserted": "{{count}} foto(s) insertada(s).",
 	"notice.insertFailed": "No se pudieron insertar {{count}} foto(s).",
-	"notice.noDate": "No se pudo determinar la fecha de esta nota. Configura el nombre de archivo o el campo del frontmatter.",
 	"notice.noActiveFile": "Abre primero una nota — no hay dónde insertar las fotos."
 }

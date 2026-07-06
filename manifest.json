@@ -1,7 +1,7 @@
 {
   "id": "immich-journal",
   "name": "Immich Journal",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "minAppVersion": "1.5.0",
   "description": "Insert photos taken on a daily note's date from a self-hosted Immich server — resized, captioned, linked back to Immich",
   "author": "fcandi",

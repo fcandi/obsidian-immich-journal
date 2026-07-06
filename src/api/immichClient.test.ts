@@ -349,6 +349,48 @@ describe("ImmichClient.fetchThumbnail", () => {
 	});
 });
 
+describe("ImmichClient.findLatestAssetDay", () => {
+	it("requests the newest image and returns its local day", async () => {
+		const asset = makeAsset("a1", "2026-07-04T22:46:00.000");
+		const requestFn = vi
+			.fn<Parameters<RequestFn>, ReturnType<RequestFn>>()
+			.mockResolvedValue(searchPage([asset], null));
+		const client = makeClient(requestFn);
+
+		const result = await client.findLatestAssetDay();
+
+		expect(result).toBe("2026-07-04");
+		expect(requestFn).toHaveBeenCalledTimes(1);
+		const body = JSON.parse(requestFn.mock.calls[0][0].body as string);
+		expect(body).toMatchObject({
+			type: "IMAGE",
+			order: "desc",
+			size: 1,
+			page: 1,
+		});
+		expect(body.takenAfter).toBeUndefined();
+		expect(body.takenBefore).toBeUndefined();
+	});
+
+	it("returns null for an empty library", async () => {
+		const requestFn = vi
+			.fn<Parameters<RequestFn>, ReturnType<RequestFn>>()
+			.mockResolvedValue(searchPage([], null));
+		const client = makeClient(requestFn);
+
+		await expect(client.findLatestAssetDay()).resolves.toBeNull();
+	});
+
+	it("returns null when a 2xx response carries a null JSON body", async () => {
+		const requestFn = vi
+			.fn<Parameters<RequestFn>, ReturnType<RequestFn>>()
+			.mockResolvedValue(makeResponse({ json: null }));
+		const client = makeClient(requestFn);
+
+		await expect(client.findLatestAssetDay()).resolves.toBeNull();
+	});
+});
+
 describe("ImmichClient.testConnection", () => {
 	function pingResponse(): RequestUrlResponse {
 		return makeResponse({ json: { res: "pong" } });
