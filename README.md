@@ -7,7 +7,8 @@ linked back to Immich.
 > **Status: early development.** Not yet released as a Community Plugin. Install via
 > BRAT (see below) to try it now.
 
-<!-- screenshot: desktop photo picker modal with grid + multi-select -->
+![Photo picker modal on desktop: grid of the day's photos with multi-select](images/photo-picker-desktop.png)
+
 <!-- screenshot: mobile photo picker sheet -->
 <!-- screenshot: settings tab -->
 <!-- screenshot: resulting daily note with inserted photos -->
