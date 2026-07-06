@@ -15,7 +15,9 @@ linked back to Immich.
 ## Features
 
 - One command opens a picker with all photos taken on the current daily note's date
-- Date is detected from the note title (configurable format) or a frontmatter field
+- Date is detected from the note title (configurable format) or a frontmatter field —
+  and when neither resolves, the picker simply opens on the most recent day that has
+  photos
 - Multi-select in the grid, then insert all chosen photos below each other at the
   cursor position (end of file if no editor is active)
 - Photos are saved as **resized local copies** — the longest edge is scaled down to a
@@ -48,7 +50,7 @@ linked back to Immich.
    - **API key** — the key from step 1
 3. Click **Test connection**. You should see a success message; if not, see
    [Troubleshooting](#troubleshooting) below.
-4. Run the **"Immich: Insert photos of this day"** command from a daily note (or via
+4. Run the **"Insert photos from Immich for this day"** command from a daily note (or via
    the ribbon icon), select photos, and insert.
 
 ### Troubleshooting
@@ -77,8 +79,8 @@ linked back to Immich.
 | | Link to Immich | On | Wraps the image in a link back to the asset in Immich |
 | Daily note | Title date format | `YYYY-MM-DD` | Moment.js format used to parse the note title |
 | | Frontmatter fallback field | *(empty)* | Used if the title doesn't parse, e.g. `created` |
-| Display | Grid columns (desktop) | `4` | Mobile uses its own fixed layout |
-| | Language | Auto | Auto follows Obsidian's locale; can be forced to English or German |
+| Display | Grid columns | `3` | Applies on desktop and mobile alike |
+| | Language | Auto | Follows Obsidian's locale; can be forced to English, German, Spanish, French, Japanese, or Chinese |
 
 ## Works great with Tailscale / VPN
 
