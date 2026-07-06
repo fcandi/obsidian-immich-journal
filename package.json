@@ -17,7 +17,7 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@types/node": "16.11.6",
+    "@types/node": "^26.1.0",
     "esbuild": "0.13.12",
     "eslint": "^10.6.0",
     "eslint-plugin-obsidianmd": "^0.4.1",
