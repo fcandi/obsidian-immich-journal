@@ -72,10 +72,10 @@ export interface PluginSettings {
 	jpegQuality: number;
 	attachmentFolder: string;
 	fileNameTemplate: string;
+	/** Only used when `embedPreset` is "custom"; presets carry fixed templates. */
 	markdownTemplate: string;
-	captionTemplate: string;
-	embedStyle: "markdown" | "wikilink";
-	linkToImmich: boolean;
+	embedPreset: "markdownLink" | "markdownPlain" | "wikilink" | "custom";
+	insertPosition: "cursor" | "top" | "bottom";
 	titleDateFormat: string;
 	frontmatterField: string;
 	gridCols: number;
@@ -89,9 +89,10 @@ export interface PluginSettings {
  *
  * Known template variables:
  * - `altText` — alt text for the image, typically the description or a fallback.
- * - `localPath` — vault-relative path to the downloaded/resized image file.
+ * - `localPath` — vault-relative path to the downloaded/resized image file,
+ *   with spaces percent-encoded for use inside markdown `(...)` link targets.
+ * - `localPathRaw` — the same path unencoded, for use inside `![[...]]` wikilinks.
  * - `immichUrl` — deep link back to the asset on the Immich server (`{server}/photos/{assetId}`).
- * - `caption` — the fully rendered caption line (from the caption template).
  * - `description` — `exifInfo.description`, if present.
  * - `time` — local time of capture, formatted `HH:mm`.
  * - `date` — local date of capture, formatted `YYYY-MM-DD`.

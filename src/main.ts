@@ -12,6 +12,7 @@ import { ImmichClient } from "./api/immichClient";
 import { t, initI18n, resolveLocale } from "./i18n";
 import { insertAssets } from "./insert/pipeline";
 import { DEFAULT_SETTINGS } from "./settings/defaults";
+import { migrateEmbedSettings, LegacyEmbedFields } from "./settings/migrate";
 import { ImmichJournalSettingTab, SettingsHost } from "./settings/SettingsTab";
 import type { ImmichAsset, PluginSettings } from "./types";
 import { PhotoPickerModal } from "./ui/PhotoPickerModal";
@@ -25,9 +26,10 @@ export default class ImmichJournalPlugin
 	client!: ImmichClient;
 
 	async onload(): Promise<void> {
-		const loaded = ((await this.loadData()) ?? {}) as Partial<PluginSettings> & {
-			gridColsDesktop?: number;
-		};
+		const loaded = ((await this.loadData()) ?? {}) as Partial<PluginSettings> &
+			LegacyEmbedFields & {
+				gridColsDesktop?: number;
+			};
 		// Migration: the column setting was named `gridColsDesktop` until 0.1.1
 		// even though it applies on mobile too. Carry a stored value over only
 		// when it differs from that era's default (4) — an untouched old
@@ -40,6 +42,8 @@ export default class ImmichJournalPlugin
 			loaded.gridCols = loaded.gridColsDesktop;
 		}
 		delete loaded.gridColsDesktop;
+		// Migration: embedStyle/linkToImmich/captionTemplate → embedPreset (0.2.0).
+		migrateEmbedSettings(loaded);
 		this.pluginSettings = Object.assign({}, DEFAULT_SETTINGS, loaded);
 		initI18n(resolveLocale(this.pluginSettings.languageOverride));
 

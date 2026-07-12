@@ -321,6 +321,38 @@ body.is-mobile .immich-journal-config-btn {
 }
 
 /* ------------------------------------------------------------------------ */
+/* Settings tab: custom template editor inside the photo embed setting row */
+/* ------------------------------------------------------------------------ */
+
+/* Let the full-width template block wrap onto its own line below the
+   setting's name/description + dropdown. */
+.immich-journal-embed-setting {
+	flex-wrap: wrap;
+}
+
+.immich-journal-template {
+	flex-basis: 100%;
+	display: flex;
+	flex-direction: column;
+	gap: 0.4rem;
+	margin-top: 0.6rem;
+}
+
+.immich-journal-template textarea {
+	width: 100%;
+	min-height: 7.5em;
+	resize: vertical;
+	font-family: var(--font-monospace);
+	font-size: var(--font-ui-small);
+}
+
+.immich-journal-template-hint {
+	color: var(--text-muted);
+	font-size: var(--font-ui-smaller);
+	line-height: 1.4;
+}
+
+/* ------------------------------------------------------------------------ */
 /* Mobile: full-height sheet feel, fixed 3-column grid, larger touch zones */
 /* ------------------------------------------------------------------------ */
 

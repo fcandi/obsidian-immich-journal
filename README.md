@@ -19,15 +19,18 @@ linked back to Immich.
 - Date is detected from the note title (configurable format) or a frontmatter field —
   and when neither resolves, the picker simply opens on the most recent day that has
   photos
-- Multi-select in the grid, then insert all chosen photos below each other at the
-  cursor position (end of file if no editor is active)
+- Multi-select in the grid, then insert all chosen photos below each other — at the
+  cursor position, at the top of the note (after frontmatter), or at the bottom
+  (configurable)
 - Photos are saved as **resized local copies** — the longest edge is scaled down to a
   configurable maximum (default 800 px), never upscaled, JPEG quality 0.85 — so your
   vault stays small and the original never leaves Immich
-- Optional caption line rendered from a template using Immich metadata
+- Simple embed presets (markdown linked to Immich, markdown without link, wikilink) —
+  the photo's Immich description automatically becomes the caption line, and an empty
+  caption is omitted entirely, no dangling formatting
+- Or full control via a custom template with Immich metadata variables
   (`{{description}}`, `{{time}}`, `{{city}}`, `{{country}}`, `{{camera}}`, `{{people}}`,
-  `{{filename}}`, …); an empty rendered caption is omitted entirely, no dangling
-  formatting
+  `{{filename}}`, …)
 - Each inserted photo links back to the original asset in your Immich web UI
 - Works on **desktop and mobile** — including setups where Immich is only reachable
   through a VPN such as Tailscale
@@ -70,14 +73,13 @@ linked back to Immich.
 | Connection | Server URL | *(empty)* | e.g. `https://immich.example.com` |
 | | API key | *(empty)* | Stored in plain text in `data.json`, per Obsidian's standard plugin-data behavior |
 | | Test connection | — | Verifies reachability, auth, and a real thumbnail fetch |
-| Insert | Max edge length (px) | `800` | Longest side of the inserted image; portrait and landscape scaled the same way; never upscales |
+| Insert | Insert position | At cursor | At cursor, top of note (after frontmatter), or bottom of note |
+| | Photo embed | Markdown, linked to Immich | Presets: markdown linked to Immich / markdown without link / wikilink — or a custom template |
+| | Custom template | `[![{{altText}}]({{localPath}})]({{immichUrl}})`<br>`*{{description}}*` | Only shown for the custom preset; lines that render empty are omitted |
+| | Max edge length (px) | `800` | Longest side of the inserted image; portrait and landscape scaled the same way; never upscales |
 | | JPEG quality | `0.85` | Applied when re-encoding the downscaled image |
 | | Attachment folder | `attachments/immich/{{year}}/` | Supports date placeholders |
 | | File name template | `{{date}}_immich_{{assetIdShort}}` | Includes the asset ID so re-inserting the same photo reuses the existing file instead of duplicating it |
-| | Markdown template | `[![{{altText}}]({{localPath}})]({{immichUrl}})`<br>`*{{caption}}*` | Full control over the inserted block |
-| | Caption template | `{{description}}` | Empty rendered result → caption line omitted |
-| | Embed style | Markdown | Markdown link (clickable) or wikilink |
-| | Link to Immich | On | Wraps the image in a link back to the asset in Immich |
 | Daily note | Title date format | `YYYY-MM-DD` | Moment.js format used to parse the note title |
 | | Frontmatter fallback field | *(empty)* | Used if the title doesn't parse, e.g. `created` |
 | Display | Grid columns | `3` | Applies on desktop and mobile alike |

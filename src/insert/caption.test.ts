@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { ImmichAsset } from "../types";
-import { buildCaptionVars, renderCaption } from "./caption";
+import { buildCaptionVars } from "./caption";
 
 function makeAsset(overrides: Partial<ImmichAsset> = {}): ImmichAsset {
 	return {
@@ -97,42 +97,5 @@ describe("buildCaptionVars", () => {
 
 	it("uses originalFileName for filename", () => {
 		expect(buildCaptionVars(makeAsset()).filename).toBe("IMG_1234.heic");
-	});
-});
-
-describe("renderCaption", () => {
-	it("renders the default template ({{description}}) with a description present", () => {
-		expect(renderCaption("{{description}}", makeAsset())).toBe("A lovely sunset");
-	});
-
-	it("returns '' when the default template renders empty (no description)", () => {
-		expect(
-			renderCaption("{{description}}", makeAsset({ exifInfo: { description: "" } }))
-		).toBe("");
-		expect(
-			renderCaption("{{description}}", makeAsset({ exifInfo: { description: null } }))
-		).toBe("");
-	});
-
-	it("returns '' when the rendered result is only whitespace", () => {
-		expect(
-			renderCaption("   {{description}}   ", makeAsset({ exifInfo: { description: null } }))
-		).toBe("");
-	});
-
-	it("trims surrounding whitespace from a non-empty render", () => {
-		expect(renderCaption("  {{description}}  ", makeAsset())).toBe("A lovely sunset");
-	});
-
-	it("supports composed templates with multiple variables", () => {
-		expect(
-			renderCaption("{{date}} {{time}} — {{city}}, {{country}}", makeAsset())
-		).toBe("2026-07-05 19:42 — Munich, Germany");
-	});
-
-	it("renders people and camera in a composed template", () => {
-		expect(renderCaption("{{camera}} ({{people}})", makeAsset())).toBe(
-			"Apple iPhone 15 Pro (Alice, Bob)"
-		);
 	});
 });

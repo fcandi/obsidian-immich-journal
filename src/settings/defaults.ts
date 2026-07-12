@@ -3,6 +3,7 @@
  * fields when merging with persisted data in main.ts.
  */
 
+import { DEFAULT_MARKDOWN_TEMPLATE } from "../insert/markdownBlock";
 import { PluginSettings } from "../types";
 
 export const DEFAULT_SETTINGS: PluginSettings = {
@@ -12,10 +13,9 @@ export const DEFAULT_SETTINGS: PluginSettings = {
 	jpegQuality: 0.85,
 	attachmentFolder: "attachments/immich/{{year}}/",
 	fileNameTemplate: "{{date}}_immich_{{assetIdShort}}",
-	markdownTemplate: "[![{{altText}}]({{localPath}})]({{immichUrl}})\n*{{caption}}*",
-	captionTemplate: "{{description}}",
-	embedStyle: "markdown",
-	linkToImmich: true,
+	markdownTemplate: DEFAULT_MARKDOWN_TEMPLATE,
+	embedPreset: "markdownLink",
+	insertPosition: "cursor",
 	titleDateFormat: "YYYY-MM-DD",
 	frontmatterField: "",
 	gridCols: 3,

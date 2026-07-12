@@ -14,8 +14,12 @@ model choices.
 ## Decided (2026-07-05) — do not re-litigate
 
 - Plugin name "Immich Journal", `id: immich-journal`, `isDesktopOnly: false`.
-- Insert at **cursor position** (no active editor → end of file). No heading logic in v1.
-- Caption default template: `{{description}}` only; empty rendered caption → omit the line.
+- Insert position is a setting since 0.2.0 (revised 2026-07-12): cursor (default; no active
+  editor → end of file), top of note (after frontmatter), or bottom of note. No heading logic.
+- Embed UI revised 2026-07-12: one `embedPreset` dropdown (markdownLink / markdownPlain /
+  wikilink / custom) replaced `embedStyle` + `linkToImmich` + `captionTemplate`; the template
+  field only shows for "custom". Presets append the Immich description as caption; an empty
+  rendered line is omitted. Legacy settings are migrated in `src/settings/migrate.ts`.
 - Images only in v1 (`type: IMAGE`); no `showVideos` setting until v1.1.
 - Resize: single **max edge length** setting (`maxEdgePx`, default 800) — longest side is
   scaled to this value, portrait and landscape treated alike; no upscaling; JPEG q=0.85.

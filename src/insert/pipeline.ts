@@ -5,12 +5,17 @@
  * sequentially: build vault paths, download+downscale (skipped when the file
  * already exists — idempotence via the asset id in the file name), write the
  * binary into the vault, render caption and markdown block. All successful
- * blocks are then joined with blank lines and inserted ONCE — at the cursor
- * when an editor is active, otherwise appended to the end of the file.
+ * blocks are then joined with blank lines and inserted ONCE.
  *
  * Per-asset failures are collected and do not abort the remaining assets.
  * A binary is only written after a successful download AND downscale, so no
  * half-written file is ever left behind on error.
+ *
+ * Where the joined result goes depends on `settings.insertPosition`:
+ * "cursor" (default) inserts at the cursor when an editor is active and
+ * appends to the end otherwise; "top" inserts after the frontmatter; "bottom"
+ * appends at the end. For "top"/"bottom" the active editor is still used when
+ * available so unsaved editor changes are never clobbered by a disk write.
  */
 
 import { App, Editor, Notice, TFile } from "obsidian";
@@ -18,10 +23,11 @@ import type { ImmichClient } from "../api/immichClient";
 import { t } from "../i18n";
 import type { ImmichAsset, PluginSettings } from "../types";
 import { buildImmichUrl } from "../util/deepLink";
-import { renderCaption } from "./caption";
-import { joinBlocks, renderBlock } from "./markdownBlock";
+import { buildCaptionVars } from "./caption";
+import { joinBlocks, renderBlock, templateForPreset } from "./markdownBlock";
 import { buildFileName, buildFolderPath, buildVaultPath } from "./paths";
 import { downscaleToJpeg } from "./downscale";
+import { frontmatterEndOffset, insertAtPosition } from "./insertPosition";
 import { fileExists, writeAssetFile } from "./vaultWriter";
 
 /** Dependencies injected by the caller (plugin main / modal). */
@@ -43,20 +49,10 @@ export interface InsertResult {
 	failed: number;
 }
 
-/**
- * Encode a vault-relative path for use inside a markdown `![](...)` target.
- *
- * Encoding choice (documented per spec): only for the `markdown` embed style
- * spaces are percent-encoded (`%20`) so paths with spaces do not break the
- * `(...)` link target. For the `wikilink` style the RAW path is passed —
- * `![[...]]` must contain the literal path, Obsidian resolves spaces there
- * natively and `%20` would break resolution. The conditional encoding happens
- * here in the pipeline, so `renderBlock`'s ctx always carries the right form
- * for the chosen style.
- */
-function localPathFor(vaultPath: string, embedStyle: PluginSettings["embedStyle"]): string {
-	return embedStyle === "markdown" ? vaultPath.replace(/ /g, "%20") : vaultPath;
-}
+// Both path forms are always provided to the template: `localPath` with
+// spaces percent-encoded (`%20`) so it never breaks a markdown `(...)` link
+// target, and `localPathRaw` unencoded for `![[...]]` wikilinks, which
+// Obsidian resolves with literal spaces (`%20` would break them there).
 
 /**
  * Download (unless already present), write, and render assets into the target
@@ -92,20 +88,19 @@ export async function insertAssets(
 				await writeAssetFile(app, vaultPath, jpeg);
 			}
 
-			// 3. Render context.
-			const caption = renderCaption(settings.captionTemplate, asset);
+			// 3. Render context: EXIF/metadata variables plus the paths/links.
 			const description = asset.exifInfo?.description ?? "";
 			const altText = description.trim() !== "" ? description : asset.originalFileName;
-			const immichUrl = buildImmichUrl(settings.serverUrl, asset.id);
-			const localPath = localPathFor(vaultPath, settings.embedStyle);
+			const vars = {
+				...buildCaptionVars(asset),
+				altText,
+				localPath: vaultPath.replace(/ /g, "%20"),
+				localPathRaw: vaultPath,
+				immichUrl: buildImmichUrl(settings.serverUrl, asset.id),
+			};
 
 			// 4. Markdown block.
-			const block = renderBlock(
-				settings.markdownTemplate,
-				{ altText, localPath, immichUrl, caption },
-				{ linkToImmich: settings.linkToImmich, embedStyle: settings.embedStyle }
-			);
-			blocks.push(block);
+			blocks.push(renderBlock(templateForPreset(settings), vars));
 		} catch (error) {
 			failed++;
 			console.error(`Immich Journal: failed to insert asset ${asset.id}`, error);
@@ -114,20 +109,33 @@ export async function insertAssets(
 
 	if (blocks.length > 0) {
 		const joined = joinBlocks(blocks);
+		const position = settings.insertPosition;
 
-		if (target.editor) {
-			// Decided: insert at the cursor position.
+		if (target.editor && position === "cursor") {
 			target.editor.replaceSelection(joined + "\n");
+		} else if (target.editor) {
+			// "top"/"bottom" with an active editor: edit via the editor so
+			// unsaved changes are preserved (a disk write could clobber them).
+			const editor = target.editor;
+			const content = editor.getValue();
+			if (position === "top") {
+				const offset = frontmatterEndOffset(content);
+				const suffix = content.slice(offset) === "" ? "\n" : "\n\n";
+				editor.replaceRange(joined + suffix, editor.offsetToPos(offset));
+			} else {
+				const separator =
+					content === "" ? "" : content.endsWith("\n") ? "\n" : "\n\n";
+				editor.replaceRange(
+					separator + joined + "\n",
+					editor.offsetToPos(content.length)
+				);
+			}
 		} else {
-			// No active editor: append to the end of the file with a
-			// separating blank line (unless the file is empty).
-			await app.vault.process(target.file, (content) => {
-				if (content === "") {
-					return joined + "\n";
-				}
-				const separator = content.endsWith("\n") ? "\n" : "\n\n";
-				return content + separator + joined + "\n";
-			});
+			// No active editor: modify the file on disk. A "cursor" position
+			// without an editor falls back to appending at the end.
+			await app.vault.process(target.file, (content) =>
+				insertAtPosition(content, joined, position === "top" ? "top" : "bottom")
+			);
 		}
 	}
 

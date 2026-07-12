@@ -9,7 +9,7 @@
  * plugin entry point.
  */
 
-import { App, Notice, PluginSettingTab, Setting, Plugin } from "obsidian";
+import { App, Notice, PluginSettingTab, Setting, Plugin, TextAreaComponent } from "obsidian";
 import { PluginSettings } from "../types";
 import { ImmichClient } from "../api/immichClient";
 import { t, setLocale, resolveLocale } from "../i18n";
@@ -115,6 +115,64 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 		new Setting(containerEl).setName(t("settings.insert")).setHeading();
 
 		new Setting(containerEl)
+			.setName(t("settings.insertPosition.name"))
+			.setDesc(t("settings.insertPosition.desc"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("cursor", t("settings.insertPosition.optionCursor"))
+					.addOption("top", t("settings.insertPosition.optionTop"))
+					.addOption("bottom", t("settings.insertPosition.optionBottom"))
+					.setValue(this.plugin.pluginSettings.insertPosition)
+					.onChange(async (value) => {
+						await this.updateSettings((settings) => {
+							settings.insertPosition = value as PluginSettings["insertPosition"];
+						});
+					})
+			);
+
+		const embedSetting = new Setting(containerEl)
+			.setName(t("settings.photoEmbed.name"))
+			.setDesc(t("settings.photoEmbed.desc"))
+			.addDropdown((dropdown) =>
+				dropdown
+					.addOption("markdownLink", t("settings.photoEmbed.optionMarkdownLink"))
+					.addOption("markdownPlain", t("settings.photoEmbed.optionMarkdownPlain"))
+					.addOption("wikilink", t("settings.photoEmbed.optionWikilink"))
+					.addOption("custom", t("settings.photoEmbed.optionCustom"))
+					.setValue(this.plugin.pluginSettings.embedPreset)
+					.onChange(async (value) => {
+						await this.updateSettings((settings) => {
+							settings.embedPreset = value as PluginSettings["embedPreset"];
+						});
+						// Re-render so the template editor appears/disappears.
+						this.display();
+					})
+			);
+
+		// The template editor lives INSIDE the photo embed setting row (no
+		// second setting with its own name): a full-width textarea below the
+		// dropdown, followed by the variables hint.
+		if (this.plugin.pluginSettings.embedPreset === "custom") {
+			embedSetting.settingEl.addClass("immich-journal-embed-setting");
+			const templateEl = embedSetting.settingEl.createDiv({
+				cls: "immich-journal-template",
+			});
+			const textArea = new TextAreaComponent(templateEl);
+			textArea.inputEl.setAttr("aria-label", t("settings.markdownTemplate.name"));
+			textArea
+				.setValue(this.plugin.pluginSettings.markdownTemplate)
+				.onChange(async (value) => {
+					await this.updateSettings((settings) => {
+						settings.markdownTemplate = value;
+					});
+				});
+			templateEl.createDiv({
+				cls: "immich-journal-template-hint",
+				text: t("settings.markdownTemplate.desc"),
+			});
+		}
+
+		new Setting(containerEl)
 			.setName(t("settings.maxEdgePx.name"))
 			.setDesc(t("settings.maxEdgePx.desc"))
 			.addText((text) =>
@@ -172,59 +230,6 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 					})
 			);
 
-		new Setting(containerEl)
-			.setName(t("settings.markdownTemplate.name"))
-			.setDesc(t("settings.markdownTemplate.desc"))
-			.addTextArea((textArea) =>
-				textArea
-					.setValue(this.plugin.pluginSettings.markdownTemplate)
-					.onChange(async (value) => {
-						await this.updateSettings((settings) => {
-							settings.markdownTemplate = value;
-						});
-					})
-			);
-
-		new Setting(containerEl)
-			.setName(t("settings.captionTemplate.name"))
-			.setDesc(t("settings.captionTemplate.desc"))
-			.addText((text) =>
-				text
-					.setValue(this.plugin.pluginSettings.captionTemplate)
-					.onChange(async (value) => {
-						await this.updateSettings((settings) => {
-							settings.captionTemplate = value;
-						});
-					})
-			);
-
-		new Setting(containerEl)
-			.setName(t("settings.embedStyle.name"))
-			.setDesc(t("settings.embedStyle.desc"))
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption("markdown", t("settings.embedStyle.optionMarkdown"))
-					.addOption("wikilink", t("settings.embedStyle.optionWikilink"))
-					.setValue(this.plugin.pluginSettings.embedStyle)
-					.onChange(async (value) => {
-						await this.updateSettings((settings) => {
-							settings.embedStyle = value as PluginSettings["embedStyle"];
-						});
-					})
-			);
-
-		new Setting(containerEl)
-			.setName(t("settings.linkToImmich.name"))
-			.setDesc(t("settings.linkToImmich.desc"))
-			.addToggle((toggle) =>
-				toggle
-					.setValue(this.plugin.pluginSettings.linkToImmich)
-					.onChange(async (value) => {
-						await this.updateSettings((settings) => {
-							settings.linkToImmich = value;
-						});
-					})
-			);
 	}
 
 	private renderDailyNoteSection(containerEl: HTMLElement): void {

@@ -1,29 +1,40 @@
 /**
  * Renders the markdown block inserted into a daily note for a single asset.
  *
- * Supports two embed styles:
- * - `markdown`: a standard markdown image, optionally wrapped in a link back
- *   to Immich, plus an italic caption line.
- * - `wikilink`: a fixed Obsidian wikilink embed (`![[path]]`). Wikilink
- *   embeds cannot carry an outer link, so `linkToImmich` has no effect on
- *   this style — documented limitation.
+ * The embed presets are plain fixed templates; "custom" uses the
+ * user-editable `markdownTemplate` setting instead. All of them render
+ * through the same path: substitute variables, then drop any line that is
+ * blank once markdown formatting characters are stripped (so a caption line
+ * like `*{{description}}*` vanishes when the photo has no description).
  */
 
+import { PluginSettings } from "../types";
 import { renderTemplate } from "../util/template";
 
-export interface MarkdownBlockContext {
-	altText: string;
-	localPath: string;
-	immichUrl: string;
-	caption: string;
-}
+export const DEFAULT_MARKDOWN_TEMPLATE =
+	"[![{{altText}}]({{localPath}})]({{immichUrl}})\n*{{description}}*";
 
-export interface MarkdownBlockOptions {
-	linkToImmich: boolean;
-	embedStyle: "markdown" | "wikilink";
-}
+/**
+ * Fixed templates behind the embed presets. `wikilink` uses the unencoded
+ * path (`localPathRaw`) because Obsidian resolves `![[...]]` targets with
+ * literal spaces; the markdown presets use the `%20`-encoded `localPath`.
+ * A wikilink embed cannot carry an outer link, hence no linked variant.
+ */
+export const PRESET_TEMPLATES: Record<
+	Exclude<PluginSettings["embedPreset"], "custom">,
+	string
+> = {
+	markdownLink: DEFAULT_MARKDOWN_TEMPLATE,
+	markdownPlain: "![{{altText}}]({{localPath}})\n*{{description}}*",
+	wikilink: "![[{{localPathRaw}}]]\n*{{description}}*",
+};
 
-export const DEFAULT_MARKDOWN_TEMPLATE = "[![{{altText}}]({{localPath}})]({{immichUrl}})\n*{{caption}}*";
+/** Resolve the effective block template for the given settings. */
+export function templateForPreset(settings: PluginSettings): string {
+	return settings.embedPreset === "custom"
+		? settings.markdownTemplate
+		: PRESET_TEMPLATES[settings.embedPreset];
+}
 
 /**
  * Return true if `line` has no visible content once common markdown
@@ -35,31 +46,11 @@ function isBlankOnceFormattingStripped(line: string): boolean {
 }
 
 /**
- * Render a single asset's markdown block.
- *
- * `template` only applies to `embedStyle: 'markdown'`. For `wikilink`, the
- * embed form is fixed and `template`/`linkToImmich` are ignored for the
- * embed line itself (a wikilink embed cannot carry an outer link).
+ * Render a single asset's markdown block: substitute `{{var}}` placeholders
+ * and drop lines that end up blank (empty caption).
  */
-export function renderBlock(template: string, ctx: MarkdownBlockContext, opts: MarkdownBlockOptions): string {
-	const vars: Record<string, string> = {
-		altText: ctx.altText,
-		localPath: ctx.localPath,
-		immichUrl: ctx.immichUrl,
-		caption: ctx.caption,
-	};
-
-	let rendered: string;
-
-	if (opts.embedStyle === "wikilink") {
-		const captionLine = renderTemplate("*{{caption}}*", vars);
-		rendered = [`![[${ctx.localPath}]]`, captionLine].join("\n");
-	} else {
-		const effectiveTemplate = opts.linkToImmich ? template : stripOuterLink(template);
-		rendered = renderTemplate(effectiveTemplate, vars);
-	}
-
-	return rendered
+export function renderBlock(template: string, vars: Record<string, string>): string {
+	return renderTemplate(template, vars)
 		.split("\n")
 		.filter((line) => !isBlankOnceFormattingStripped(line))
 		.join("\n");
@@ -72,11 +63,10 @@ export function renderBlock(template: string, ctx: MarkdownBlockContext, opts: M
  * image is stripped; any other lines in the template (e.g. the caption
  * line) are left untouched.
  *
- * This operates on the template (before variable substitution), not on the
- * rendered output, so it never risks mangling user-provided caption text
- * that happens to contain brackets.
+ * Only used by the settings migration (the legacy "Link to Immich" toggle
+ * worked by stripping the link from the template before rendering).
  */
-function stripOuterLink(template: string): string {
+export function stripOuterLink(template: string): string {
 	const lines = template.split("\n");
 	const imageLineIndex = lines.findIndex((line) => /!\[.*\]\(.*\)/.test(line));
 	if (imageLineIndex === -1) {

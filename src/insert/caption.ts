@@ -1,11 +1,9 @@
 import type { ImmichAsset } from "../types";
-import { renderTemplate } from "../util/template";
 
 /**
- * Builds the template variable bag for an asset's caption, using only the
- * subset of variables that are meaningful for a caption line:
+ * Builds the metadata portion of the template variable bag for an asset:
  * `description`, `time`, `date`, `city`, `country`, `camera`, `people`,
- * `filename`.
+ * `filename`. The pipeline adds the path/link variables on top.
  *
  * `localDateTime` is already local wall-clock time (no timezone math): the
  * first 10 characters are the `YYYY-MM-DD` date, the characters at
@@ -41,17 +39,4 @@ export function buildCaptionVars(asset: ImmichAsset): Record<string, string> {
 		people,
 		filename: asset.originalFileName,
 	};
-}
-
-/**
- * Renders the caption template for an asset and trims the result.
- *
- * If the trimmed result is empty (e.g. default template `{{description}}`
- * with no description present), returns `''` — callers are expected to
- * omit the caption line entirely in that case (decided default behavior).
- */
-export function renderCaption(tpl: string, asset: ImmichAsset): string {
-	const vars = buildCaptionVars(asset);
-	const rendered = renderTemplate(tpl, vars).trim();
-	return rendered;
 }
