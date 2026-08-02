@@ -359,12 +359,16 @@ body.is-mobile .immich-journal-config-btn {
 body.is-mobile .immich-journal-modal {
 	width: 100%;
 	max-width: 100vw;
-	height: 100%;
-	max-height: 100vh;
+	/* Obsidian's phone layout caps modals below the OS status bar via
+	   --modal-max-height (100vh minus its natively provided safe-area
+	   inset). Reuse those variables instead of forcing a 100vh sheet that
+	   would slide under the status bar; the margin pins the sheet to the
+	   bottom of the centered flex container so the remaining free space
+	   ends up above it, exactly covering the status bar. */
+	height: var(--modal-max-height, 100%);
+	max-height: var(--modal-max-height, 100vh);
+	margin-top: var(--safe-area-inset-top, 0px);
 	border-radius: 0;
-	/* Full-height sheet: keep the header (and the built-in close button)
-	   out of the iOS status-bar / notch zone. */
-	padding-top: env(safe-area-inset-top, 0px);
 }
 
 /* Hide Obsidian's built-in floating close button on mobile: depending on
@@ -372,7 +376,8 @@ body.is-mobile .immich-journal-modal {
    where taps do not register. The modal renders its own in-flow close
    button in the header instead. The container class covers the button
    wherever Obsidian mounts it in the modal DOM. */
-body.is-mobile .immich-journal-modal-container .modal-close-button {
+body.is-mobile .immich-journal-modal-container .modal-close-button,
+body.is-mobile .immich-journal-modal .modal-close-button {
 	display: none;
 }
 

@@ -121,6 +121,11 @@ export class PhotoPickerModal extends Modal {
 		// mounts it; renderHeader() adds an in-flow close button instead.
 		if (Platform.isMobile) {
 			this.containerEl.addClass("immich-journal-modal-container");
+			// Also hide directly: unlike the stylesheet this cannot be
+			// defeated by CSS caching or DOM changes above the button.
+			for (const el of this.containerEl.findAll(".modal-close-button")) {
+				el.hide();
+			}
 		}
 		// Also expose the configured column count on the modal itself so the
 		// loading skeleton grid matches the real grid before assets arrive.
