@@ -228,17 +228,22 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 		return value;
 	}
 
-	private renderApiKeyControl(setting: Setting): void {
+	private renderApiKeyControl(setting: Setting): () => void {
+		let inputEl: HTMLInputElement | null = null;
 		setting.addText((text) => {
+			inputEl = text.inputEl;
 			text.inputEl.type = "password";
 			text.setValue(this.plugin.pluginSettings.apiKey).onChange(async (value) => {
 				await this.setControlValue("apiKey", value);
 			});
 		});
+		return () => inputEl?.remove();
 	}
 
-	private renderTestConnectionButton(setting: Setting): void {
-		setting.addButton((button) =>
+	private renderTestConnectionButton(setting: Setting): () => void {
+		let buttonEl: HTMLButtonElement | null = null;
+		setting.addButton((button) => {
+			buttonEl = button.buttonEl;
 			button.setButtonText(t("settings.testConnection.button")).onClick(async () => {
 				button.setDisabled(true);
 				try {
@@ -247,15 +252,18 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 				} finally {
 					button.setDisabled(false);
 				}
-			})
-		);
+			});
+		});
+		return () => buttonEl?.remove();
 	}
 
 	/**
 	 * Full-width template editor row shown while the "custom" preset is
-	 * active: a textarea followed by the variables hint.
+	 * active: a textarea followed by the variables hint. Returns a cleanup
+	 * callback — the row is re-rendered on every update() (e.g. preset
+	 * switches), and without it each pass would append another editor.
 	 */
-	private renderTemplateEditor(setting: Setting): void {
+	private renderTemplateEditor(setting: Setting): () => void {
 		setting.settingEl.addClass("immich-journal-embed-setting");
 		const templateEl = setting.settingEl.createDiv({
 			cls: "immich-journal-template",
@@ -271,6 +279,10 @@ export class ImmichJournalSettingTab extends PluginSettingTab {
 			cls: "immich-journal-template-hint",
 			text: t("settings.markdownTemplate.desc"),
 		});
+		return () => {
+			templateEl.remove();
+			setting.settingEl.removeClass("immich-journal-embed-setting");
+		};
 	}
 
 	/** Maps a {@link ConnectionTestResult}-shaped outcome to the matching i18n message. */
