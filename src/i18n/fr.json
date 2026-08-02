@@ -70,6 +70,7 @@
 	"modal.openSettings": "Ouvrir les paramètres du plugin",
 	"modal.prevDay": "Jour précédent",
 	"modal.nextDay": "Jour suivant",
+	"modal.close": "Fermer",
 	"modal.datePlaceholder": "Saisissez la date (YYYY-MM-DD)",
 	"modal.selectedCount": "{{count}} sélectionnée(s)",
 	"modal.insertButton": "Insérer",

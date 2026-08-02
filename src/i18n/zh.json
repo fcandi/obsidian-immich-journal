@@ -70,6 +70,7 @@
 	"modal.openSettings": "打开插件设置",
 	"modal.prevDay": "前一天",
 	"modal.nextDay": "后一天",
+	"modal.close": "关闭",
 	"modal.datePlaceholder": "输入日期（YYYY-MM-DD）",
 	"modal.selectedCount": "已选择 {{count}} 张",
 	"modal.insertButton": "插入",
