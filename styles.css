@@ -376,6 +376,12 @@ body.is-mobile .immich-journal-modal .modal-content {
 	height: 100%;
 }
 
+/* A little extra air between the built-in close button (floating above the
+   header's right end) and the date input below it. */
+body.is-mobile .immich-journal-header {
+	padding-top: calc(0.75rem + 4px);
+}
+
 body.is-mobile .immich-journal-body {
 	flex: 1 1 auto;
 	overflow-y: auto;
