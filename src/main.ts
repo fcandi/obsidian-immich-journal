@@ -16,7 +16,15 @@ import { migrateEmbedSettings, LegacyEmbedFields } from "./settings/migrate";
 import { ImmichJournalSettingTab, SettingsHost } from "./settings/SettingsTab";
 import type { ImmichAsset, PluginSettings } from "./types";
 import { PhotoPickerModal } from "./ui/PhotoPickerModal";
-import { resolveNoteDate } from "./util/resolveDate";
+import { resolveNoteDate, MomentFn } from "./util/resolveDate";
+
+/**
+ * Obsidian re-exports moment, but its type declarations resolve through the
+ * external moment package, which the directory review bot's lint environment
+ * does not install — the value is error-typed there. MomentFn is the surface
+ * resolveNoteDate actually uses.
+ */
+const momentFn = moment as unknown as MomentFn;
 
 export default class ImmichJournalPlugin
 	extends Plugin
@@ -94,7 +102,7 @@ export default class ImmichJournalPlugin
 				titleFormat: this.pluginSettings.titleDateFormat,
 				frontmatterField: this.pluginSettings.frontmatterField,
 			},
-			moment
+			momentFn
 		);
 		// No resolvable date is not an error: the modal then starts on the
 		// most recent day that has photos and lets the user navigate.

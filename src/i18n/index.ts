@@ -1,4 +1,12 @@
 import { getLanguage, moment } from "obsidian";
+
+/**
+ * Obsidian re-exports moment, but its type declarations resolve through the
+ * external moment package, which the directory review bot's lint environment
+ * does not install — calls become error-typed there. Type the tiny surface
+ * this module uses locally so the checks hold in any environment.
+ */
+const momentLocale = moment as unknown as { locale(): string };
 import { renderTemplate } from "../util/template";
 import * as de from "./de.json";
 import * as en from "./en.json";
@@ -54,7 +62,7 @@ export function resolveLocale(override: LocaleSetting): Locale {
 		detected = getLanguage();
 	} catch {
 		try {
-			detected = moment.locale();
+			detected = momentLocale.locale();
 		} catch {
 			detected = "en";
 		}

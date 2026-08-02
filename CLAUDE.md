@@ -58,6 +58,14 @@ Before **every** release tag:
    (currently `ES2018`). An outdated `lib` makes calls like `Object.entries`/`padStart`
    error-typed in the bot's environment and cascades into dozens of `no-unsafe-*`
    findings, even when the local toolchain resolves them fine.
+4. The bot does **not install transitive type packages** — values typed through
+   `moment` (obsidian's re-export) or `@types/node` are error-typed there even when
+   local lint is clean. Never call those directly: go through a locally-typed
+   module-level const (`const momentFn = moment as unknown as MomentFn` — module
+   level, not at the argument position, or local lint flags the cast as
+   unnecessary). To verify like the bot does, temporarily move
+   `node_modules/moment` and `node_modules/@types/node` aside, run `npm run lint`
+   (must stay clean), then move them back.
 
 ## Dev workflow (live testing without installing)
 
