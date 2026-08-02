@@ -38,8 +38,9 @@
 }
 
 /* Desktop only: keep the date input clear of Obsidian's absolutely
-   positioned modal close button in the top-right corner. On mobile that
-   button is hidden and the header carries its own in-flow close button. */
+   positioned modal close button in the top-right corner. On mobile the
+   modal starts below the status bar (see the mobile block) and the
+   built-in close button sits above the header row, clear of the input. */
 body:not(.is-mobile) .immich-journal-header {
 	padding-right: 2rem;
 }
@@ -369,16 +370,6 @@ body.is-mobile .immich-journal-modal {
 	max-height: var(--modal-max-height, 100vh);
 	margin-top: var(--safe-area-inset-top, 0px);
 	border-radius: 0;
-}
-
-/* Hide Obsidian's built-in floating close button on mobile: depending on
-   platform and Obsidian version it can land inside the OS status-bar zone
-   where taps do not register. The modal renders its own in-flow close
-   button in the header instead. The container class covers the button
-   wherever Obsidian mounts it in the modal DOM. */
-body.is-mobile .immich-journal-modal-container .modal-close-button,
-body.is-mobile .immich-journal-modal .modal-close-button {
-	display: none;
 }
 
 body.is-mobile .immich-journal-modal .modal-content {

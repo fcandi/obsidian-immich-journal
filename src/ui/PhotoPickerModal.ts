@@ -1,4 +1,4 @@
-import { App, Modal, Platform, setIcon } from "obsidian";
+import { App, Modal } from "obsidian";
 import { ImmichClient, ImmichError } from "../api/immichClient";
 import { t } from "../i18n";
 import type { ImmichAsset, PluginSettings } from "../types";
@@ -114,19 +114,6 @@ export class PhotoPickerModal extends Modal {
 
 	onOpen(): void {
 		this.modalEl.addClass("immich-journal-modal");
-		// On mobile the built-in floating close button can end up inside the
-		// OS status-bar zone (safe-area insets are unreliable across
-		// platforms and Obsidian versions), making it untappable. Tag the
-		// container so CSS can hide the built-in button wherever Obsidian
-		// mounts it; renderHeader() adds an in-flow close button instead.
-		if (Platform.isMobile) {
-			this.containerEl.addClass("immich-journal-modal-container");
-			// Also hide directly: unlike the stylesheet this cannot be
-			// defeated by CSS caching or DOM changes above the button.
-			for (const el of this.containerEl.findAll(".modal-close-button")) {
-				el.hide();
-			}
-		}
 		// Also expose the configured column count on the modal itself so the
 		// loading skeleton grid matches the real grid before assets arrive.
 		this.modalEl.style.setProperty(
@@ -252,18 +239,6 @@ export class PhotoPickerModal extends Modal {
 				this.setDate(value);
 			}
 		});
-
-		// Mobile replacement for the hidden built-in close button: part of
-		// the header's normal flex flow, so it can never leave the visible
-		// area regardless of safe-area insets or Obsidian's modal layout.
-		if (Platform.isMobile) {
-			const closeBtn = this.headerEl.createEl("button", {
-				cls: "immich-journal-nav-btn immich-journal-close-btn",
-				attr: { "aria-label": t("modal.close") },
-			});
-			setIcon(closeBtn, "x");
-			closeBtn.addEventListener("click", () => this.close());
-		}
 
 		this.updateHeader();
 	}

@@ -70,7 +70,6 @@
 	"modal.openSettings": "プラグイン設定を開く",
 	"modal.prevDay": "前日",
 	"modal.nextDay": "翌日",
-	"modal.close": "閉じる",
 	"modal.datePlaceholder": "日付を入力（YYYY-MM-DD）",
 	"modal.selectedCount": "{{count}}枚選択中",
 	"modal.insertButton": "挿入",
