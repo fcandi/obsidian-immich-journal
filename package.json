@@ -1,6 +1,6 @@
 {
   "name": "immich-journal",
-  "version": "0.2.1-beta.3",
+  "version": "0.2.1-beta.4",
   "description": "Obsidian plugin: insert photos from a self-hosted Immich server into daily notes",
   "main": "main.js",
   "private": true,
