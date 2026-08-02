@@ -41,6 +41,24 @@ model choices.
   in the same change.
 - No secrets in the repo — server URL and API key are runtime settings only.
 
+## Release lint discipline (lesson from Garmin plugin 0.10.0, 2026-08-02)
+
+The community-directory review bot lints with the **latest** `eslint-plugin-obsidianmd`
+plus type-aware `@typescript-eslint/no-unsafe-*` rules. A locally clean `npm run lint`
+means nothing if the local plugin version or ruleset lags — the Garmin plugin shipped
+0.10.0 with a clean local lint and got a "Caution" badge with ~90 warnings.
+
+Before **every** release tag:
+
+1. Check the lint plugin is current: `npm outdated eslint-plugin-obsidianmd` — if
+   outdated, update it, rerun lint, and fix what the new version flags.
+2. `npm run lint` must be completely clean **including** the mirrored type-aware rules
+   in `eslint.config.mts` (do not remove or weaken that block).
+3. Keep `tsconfig.json` `lib` at least as new as the newest JS API the code uses
+   (currently `ES2018`). An outdated `lib` makes calls like `Object.entries`/`padStart`
+   error-typed in the bot's environment and cascades into dozens of `no-unsafe-*`
+   findings, even when the local toolchain resolves them fine.
+
 ## Dev workflow (live testing without installing)
 
 - `npm run dev` — esbuild watch, emits `main.js` into the repo root.
